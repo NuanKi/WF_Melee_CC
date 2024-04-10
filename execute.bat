@@ -1,0 +1,1 @@
+pyinstaller -w -F -i ".\src\assets\icon.ico" "CriticalChance.py" --add-data ".\src\;asset" --onefile --windowed --add-data "information.png:.
