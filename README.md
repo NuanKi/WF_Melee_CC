@@ -1,7 +1,3 @@
-Certainly! Here's a suggested description for your GitHub repository:
-
----
-
 ### Warframe Melee Critical Chance Calculator
 
 **Description:**
