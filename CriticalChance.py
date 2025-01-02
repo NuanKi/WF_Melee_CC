@@ -22,10 +22,9 @@ def calculate(*args):
 
         # Start with the base Wrathful Advance
         wrathful_advance = float(entry_wrathful_advance.get()) / 100 if entry_wrathful_advance.get() else 0
-        multiplier = 2 if not check_helminth.get() else 1
-        wrathful_advance *= multiplier
 
         # Apply the multiplier to the checkboxes' bonuses
+        multiplier = 2 if not check_helminth.get() else 1
         if check_molt_augmented.get(): wrathful_advance += 0.60 * multiplier
         if check_growing_power.get(): wrathful_advance += 0.25 * multiplier
         if check_vome_invocation.get(): wrathful_advance += 0.60 * multiplier
