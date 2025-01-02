@@ -2,114 +2,117 @@ import tkinter as tk
 import os
 import sys
 
+# Function to handle file paths when packaging the application
 def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS
     except Exception:
         base_path = os.path.abspath(".")
-
     return os.path.join(base_path, relative_path)
 
-def calculate():
-    # Retrieve values from the entry fields and convert them to floats
-    base_crit = float(entry_base_crit.get()) / 100 if entry_base_crit.get() else 0
-    relative_bonus = float(entry_relative_bonus.get()) / 100 if entry_relative_bonus.get() else 0
-    blood_rush_multi = float(entry_blood_rush_multi.get()) / 100 if entry_blood_rush_multi.get() else 0
-    gladiator_set_bonus = float(entry_gladiator_set_bonus.get()) / 100 if entry_gladiator_set_bonus.get() else 0
-    combo_multi = float(entry_combo_multi.get()) if entry_combo_multi.get() else 0
+# Update the calculate function to include the new checkboxes in the absolute_bonus calculation
+def calculate(*args):
+    try:
+        # Retrieve values from the entry fields and convert them to floats
+        base_crit = float(entry_base_crit.get()) / 100 if entry_base_crit.get() else 0
+        relative_bonus = float(entry_relative_bonus.get()) / 100 if entry_relative_bonus.get() else 0
+        blood_rush_multi = float(entry_blood_rush_multi.get()) / 100 if entry_blood_rush_multi.get() else 0
+        gladiator_set_bonus = float(entry_gladiator_set_bonus.get()) / 100 if entry_gladiator_set_bonus.get() else 0
+        combo_multi = float(entry_combo_multi.get()) if entry_combo_multi.get() else 0
 
-    # Start with the base Wrathful Advance and add to it based on the checkboxes
-    wrathful_advance = float(entry_wrathful_advance.get()) / 100 if entry_wrathful_advance.get() else 0
-    multiplier = 2 if not check_helminth.get() else 1
-    if check_molt_augmented.get(): wrathful_advance += 0.60 * multiplier
-    if check_growing_power.get(): wrathful_advance += 0.25 * multiplier
-    if check_vome_invocation.get(): wrathful_advance += 0.60 * multiplier
+        # Start with the base Wrathful Advance
+        wrathful_advance = float(entry_wrathful_advance.get()) / 100 if entry_wrathful_advance.get() else 0
+        multiplier = 2 if not check_helminth.get() else 1
+        wrathful_advance *= multiplier
 
-    # Initialize absolute_bonus with wrathful_advance
-    absolute_bonus = wrathful_advance
-    # Add any other similar bonuses to absolute_bonus
-    # For example:
-    # another_bonus = ... # calculate or retrieve another bonus
-    # absolute_bonus += another_bonus
+        # Apply the multiplier to the checkboxes' bonuses
+        if check_molt_augmented.get(): wrathful_advance += 0.60 * multiplier
+        if check_growing_power.get(): wrathful_advance += 0.25 * multiplier
+        if check_vome_invocation.get(): wrathful_advance += 0.60 * multiplier
+        if check_naramon_school.get(): wrathful_advance += 0.40 * multiplier
 
-    # Calculate the total critical chance
-    if combo_multi > 0:
-        total_crit_chance = base_crit * (1 + relative_bonus + (blood_rush_multi + gladiator_set_bonus) * (combo_multi - 1)) + absolute_bonus
-    else:
-        total_crit_chance = base_crit * (1 + relative_bonus) + absolute_bonus
+        # Initialize absolute_bonus with wrathful_advance
+        absolute_bonus = wrathful_advance
 
-    # Update the result label with the calculated total critical chance
-    label_result.config(text=f"Total Critical Chance: {total_crit_chance:.2%}")
+        # Add the values of the new checkboxes to the absolute_bonus
+        if check_arcane_avenger.get(): absolute_bonus += 0.45
+        if check_cats_eye.get(): absolute_bonus += 0.60
 
-    # Determine the Crit Tier based on the total critical chance
-    crit_tier = ""
-    crit_tier_number = ""
-    if total_crit_chance <= 0:
-        crit_tier = "Tier 0 - No hit can crit"
+        # Calculate the total critical chance
+        if combo_multi > 0:
+            total_crit_chance = base_crit * (1 + relative_bonus + (blood_rush_multi + gladiator_set_bonus) * (combo_multi - 1)) + absolute_bonus
+        else:
+            total_crit_chance = base_crit * (1 + relative_bonus) + absolute_bonus
+
+        # Determine the Crit Tier based on the total critical chance
+        crit_tier = ""
         crit_tier_number = 0
-    elif 0 < total_crit_chance < 1:
-        crit_tier = "Tier 1 - Chance for a yellow crit"
-        crit_tier_number = 1
-    elif total_crit_chance == 1:
-        crit_tier = "Tier 1 - All hits yellow crit"
-        crit_tier_number = 1
-    elif 1 < total_crit_chance < 2:
-        crit_tier = "Tier 2 - Chance for an orange crit"
-        crit_tier_number = 2
-    elif total_crit_chance == 2:
-        crit_tier = "Tier 2 - All hits orange crit"
-        crit_tier_number = 2
-    elif 2 < total_crit_chance < 3:
-        crit_tier = "Tier 3 - Chance for a red crit (tier 3)"
-        crit_tier_number = 3
-    elif total_crit_chance == 3:
-        crit_tier = "Tier 3 - All hits red crit (tier 3)"
-        crit_tier_number = 3
-    elif 3 < total_crit_chance < 4:
-        crit_tier = "Tier 4 - Chance for a red crit (tier 4)"
-        crit_tier_number = 4
-    elif total_crit_chance == 4:
-        crit_tier = "Tier 4 - All hits red crit (tier 4)"
-        crit_tier_number = 4
-    elif 4 < total_crit_chance < 5:
-        crit_tier = "Tier 5 - Chance for a red crit (tier 5)"
-        crit_tier_number = 5
-    elif total_crit_chance == 5:
-        crit_tier = "Tier 5 - All hits red crit (tier 5)"
-        crit_tier_number = 5
-    elif 5 < total_crit_chance < 6:
-        crit_tier = "Tier 6 - Chance for a red crit (tier 6)"
-        crit_tier_number = 6
-    elif total_crit_chance == 6:
-        crit_tier = "Tier 6 - All hits red crit (tier 6)"
-        crit_tier_number = 6
-    elif 6 < total_crit_chance < 7:
-        crit_tier = "Tier 7 - Chance for a red crit (tier 7)"
-        crit_tier_number = 7
-    elif total_crit_chance == 7:
-        crit_tier = "Tier 7 - All hits red crit (tier 7)"
-        crit_tier_number = 7
-        # Add additional conditions for higher tiers if necessary
+        if total_crit_chance <= 0:
+            crit_tier = "Tier 0 - No hit can crit"
+        elif 0 < total_crit_chance < 1:
+            crit_tier = "Tier 1 - Chance for a yellow crit"
+            crit_tier_number = 1
+        elif total_crit_chance == 1:
+            crit_tier = "Tier 1 - All hits yellow crit"
+            crit_tier_number = 1
+        elif 1 < total_crit_chance < 2:
+            crit_tier = "Tier 2 - Chance for an orange crit"
+            crit_tier_number = 2
+        elif total_crit_chance == 2:
+            crit_tier = "Tier 2 - All hits orange crit"
+            crit_tier_number = 2
+        elif 2 < total_crit_chance < 3:
+            crit_tier = "Tier 3 - Chance for a red crit (tier 3)"
+            crit_tier_number = 3
+        elif total_crit_chance == 3:
+            crit_tier = "Tier 3 - All hits red crit (tier 3)"
+            crit_tier_number = 3
+        elif 3 < total_crit_chance < 4:
+            crit_tier = "Tier 4 - Chance for a red crit (tier 4)"
+            crit_tier_number = 4
+        elif total_crit_chance == 4:
+            crit_tier = "Tier 4 - All hits red crit (tier 4)"
+            crit_tier_number = 4
+        elif 4 < total_crit_chance < 5:
+            crit_tier = "Tier 5 - Chance for a red crit (tier 5)"
+            crit_tier_number = 5
+        elif total_crit_chance == 5:
+            crit_tier = "Tier 5 - All hits red crit (tier 5)"
+            crit_tier_number = 5
+        elif 5 < total_crit_chance < 6:
+            crit_tier = "Tier 6 - Chance for a red crit (tier 6)"
+            crit_tier_number = 6
+        elif total_crit_chance == 6:
+            crit_tier = "Tier 6 - All hits red crit (tier 6)"
+            crit_tier_number = 6
+        elif 6 < total_crit_chance < 7:
+            crit_tier = "Tier 7 - Chance for a red crit (tier 7)"
+            crit_tier_number = 7
+        elif total_crit_chance == 7:
+            crit_tier = "Tier 7 - All hits red crit (tier 7)"
+            crit_tier_number = 7
 
-    # Update the result label with the calculated total critical chance and crit tier
-    label_result.config(text=f"Total Critical Chance: {total_crit_chance:.2%}\n{crit_tier}")
+        # Update the result label with the calculated total critical chance and crit tier
+        label_result.config(text=f"Total Critical Chance: {total_crit_chance:.2%}\n{crit_tier}")
 
-    # Retrieve the Modded Crit Multiplier value from the entry field
-    modded_crit_multi = float(entry_modded_crit_multi.get()) if entry_modded_crit_multi.get() else 0
+        # Retrieve the Modded Crit Multiplier value from the entry field
+        modded_crit_multi = float(entry_modded_crit_multi.get()) if entry_modded_crit_multi.get() else 0
 
-    # Calculate the Crit Tier Multiplier using the formula
-    crit_tier_multi = 1 + (crit_tier_number * (modded_crit_multi - 1))
+        # Calculate the Crit Tier Multiplier using the formula
+        crit_tier_multi = 1 + (crit_tier_number * (modded_crit_multi - 1))
 
-    # Calculate Average Damage
-    average_crit_multi = 1 + total_crit_chance * (modded_crit_multi - 1)
+        # Calculate Average Damage
+        average_crit_multi = 1 + total_crit_chance * (modded_crit_multi - 1)
 
-    # Check if modded_crit_multi has a value greater than 0 before updating the label
-    if modded_crit_multi > 0:
-        # Update the result label with the calculated Crit Tier Multiplier and Average Multi
-        label_result.config(text=f"Total Critical Chance: {total_crit_chance:.2%}\nCrit Tier: {crit_tier}\nCrit Tier Multiplier: {crit_tier_multi:.2f} Average Multi: {average_crit_multi:.2f}")
-    else:
-        # Update the result label without the Crit Tier Multiplier and Average Multi
-        label_result.config(text=f"Total Critical Chance: {total_crit_chance:.2%}\nCrit Tier: {crit_tier}")
+        # Check if modded_crit_multi has a value greater than 0 before updating the label
+        if modded_crit_multi > 0:
+            # Update the result label with the calculated Crit Tier Multiplier and Average Multi
+            label_result.config(text=f"Total Critical Chance: {total_crit_chance:.2%}\nCrit Tier: {crit_tier}\nCrit Tier Multiplier: {crit_tier_multi:.2f} Average Multi: {average_crit_multi:.2f}")
+        else:
+            # Update the result label without the Crit Tier Multiplier and Average Multi
+            label_result.config(text=f"Total Critical Chance: {total_crit_chance:.2%}\nCrit Tier: {crit_tier}")
+    except ValueError:
+        label_result.config(text="Please enter valid numbers in all fields.")
 
 def open_new_tab():
     # This function creates a new top-level window ('tab')
@@ -155,46 +158,83 @@ def open_new_tab():
 # Create the main window
 root = tk.Tk()
 root.title("Warframe Melee Critical Chance Calculator")
+root.geometry("600x400")  # Set the initial window size
 
-# Define the layout using grid
-root.columnconfigure(1, weight=1)
-root.rowconfigure(1, weight=1)
+
+# Load the icon image
+icon_image = tk.PhotoImage(file=resource_path("icon.png"))  # Use icon.png or icon.ico
+
+# Set the window icon
+root.iconphoto(False, icon_image)
+
+# Create a frame to hold all widgets
+frame = tk.Frame(root)
+frame.place(relx=0.5, rely=0.5, anchor='center')
 
 # Create labels, entry fields, and checkboxes for the user to input their values
-labels = ["Base Crit Chance (%)", "Relative Bonus (%)", "Blood Rush Multiplier (%)", "Gladiator Set Bonus (%)", "Combo Multiplier", "Wrathful Advance (%)"]
+labels = ["Base Crit Chance (%)", "Relative Bonus (%)", "Blood Rush Multiplier (%)", "Gladiator Set Bonus (%)", "Combo Multiplier", "Modded Crit Multiplier"]
 entries = []
+entry_vars = []
 for i, text in enumerate(labels):
-    tk.Label(root, text=text).grid(row=i, column=0, sticky='e', padx=10, pady=5)
-    entry = tk.Entry(root, width=7)  # Set a smaller width for the entry field
-    entry.grid(row=i, column=1, sticky='ew', padx=10, pady=5)
+    tk.Label(frame, text=text).grid(row=i, column=0, sticky='e', padx=10, pady=5)
+    var = tk.StringVar()
+    entry = tk.Entry(frame, textvariable=var, width=7)  # Set a smaller width for the entry field
+    entry.grid(row=i, column=1, sticky='w', padx=10, pady=5)
     entries.append(entry)
+    entry_vars.append(var)
 
-entry_base_crit, entry_relative_bonus, entry_blood_rush_multi, entry_gladiator_set_bonus, entry_combo_multi, entry_wrathful_advance = entries
+entry_base_crit, entry_relative_bonus, entry_blood_rush_multi, entry_gladiator_set_bonus, entry_combo_multi, entry_modded_crit_multi = entries
 
-tk.Label(root, text="Modded Crit Multiplier").grid(row=6, column=0, sticky='e', padx=10, pady=5)
-entry_modded_crit_multi = tk.Entry(root, width=7)
-entry_modded_crit_multi.grid(row=6, column=1, sticky='ew', padx=10, pady=5)
+# Create the Wrathful Advance entry field separately
+tk.Label(frame, text="Wrathful Advance (%)").grid(row=0, column=2, sticky='e', padx=10, pady=5)
+var_wrathful_advance = tk.StringVar()
+entry_wrathful_advance = tk.Entry(frame, textvariable=var_wrathful_advance, width=7)
+entry_wrathful_advance.grid(row=0, column=3, sticky='w', padx=10, pady=5)
 
-# Checkboxes for additional bonuses
+check_helminth = tk.BooleanVar(value=True)
+tk.Checkbutton(frame, text="Helminth", variable=check_helminth).grid(row=1, column=2, columnspan=2, sticky='w', padx=20, pady=5)
+
 check_molt_augmented = tk.BooleanVar()
-tk.Checkbutton(root, text="Molt Augmented (+60%)", variable=check_molt_augmented).grid(row=7, column=0, columnspan=2, sticky='w', padx=20, pady=5)
+tk.Checkbutton(frame, text="Molt Augmented (+60%)", variable=check_molt_augmented).grid(row=2, column=2, columnspan=2, sticky='w', padx=20, pady=5)
 
 check_growing_power = tk.BooleanVar()
-tk.Checkbutton(root, text="Growing Power (+25%)", variable=check_growing_power).grid(row=8, column=0, columnspan=2, sticky='w', padx=20, pady=5)
+tk.Checkbutton(frame, text="Growing Power (+25%)", variable=check_growing_power).grid(row=3, column=2, columnspan=2, sticky='w', padx=20, pady=5)
 
 check_vome_invocation = tk.BooleanVar()
-tk.Checkbutton(root, text="Vome Invocation (+60%)", variable=check_vome_invocation).grid(row=9, column=0, columnspan=2, sticky='w', padx=20, pady=5)
+tk.Checkbutton(frame, text="Vome Invocation (+60%)", variable=check_vome_invocation).grid(row=4, column=2, columnspan=2, sticky='w', padx=20, pady=5)
 
-check_helminth = tk.BooleanVar()
-tk.Checkbutton(root, text="Helminth", variable=check_helminth).grid(row=5, column=2, padx=10, pady=5)
+check_naramon_school = tk.BooleanVar()
+tk.Checkbutton(frame, text="Naramon School (+40%)", variable=check_naramon_school).grid(row=5, column=2, columnspan=2, sticky='w', padx=20, pady=5)
 
-# Create a button that will calculate the total critical chance when clicked
-button_calculate = tk.Button(root, text="Calculate", command=calculate)
-button_calculate.grid(row=10, column=0, columnspan=3, pady=10)
+# Trace the checkboxes to call the calculate function when their state changes
+check_molt_augmented.trace_add('write', calculate)
+check_growing_power.trace_add('write', calculate)
+check_vome_invocation.trace_add('write', calculate)
+check_naramon_school.trace_add('write', calculate)
+check_helminth.trace_add('write', calculate)
+
+# Trace the entry fields to call the calculate function when their value changes
+for var in entry_vars:
+    var.trace_add('write', calculate)
+var_wrathful_advance.trace_add('write', calculate)
 
 # Create a label to display the result
-label_result = tk.Label(root, text="Total Critical Chance: ")
-label_result.grid(row=11, column=0, columnspan=3, pady=10)
+label_result = tk.Label(frame, text="Total Critical Chance: ")
+label_result.grid(row=12, column=0, columnspan=4, pady=10, sticky='ew')
+
+# Create the "Absolute Bonuses:" label above the "Calculate" button
+tk.Label(frame, text="Absolute Bonuses:").grid(row=10, column=1, columnspan=2, sticky='w', padx=10, pady=5)
+
+# Add the checkboxes for "Arcane Avenger" and "Cat's Eye"
+check_arcane_avenger = tk.BooleanVar()
+tk.Checkbutton(frame, text="Arcane Avenger (+45%)", variable=check_arcane_avenger).grid(row=11, column=0, columnspan=2, sticky='w', padx=20, pady=5)
+
+check_cats_eye = tk.BooleanVar()
+tk.Checkbutton(frame, text="Cat's Eye (+60%)", variable=check_cats_eye).grid(row=11, column=2, columnspan=2, sticky='w', padx=20, pady=5)
+
+# Trace the new checkboxes to call the calculate function when their state changes
+check_arcane_avenger.trace_add('write', calculate)
+check_cats_eye.trace_add('write', calculate)
 
 # Load the logo image
 original_logo_image = tk.PhotoImage(file=resource_path("information.png"))
@@ -203,8 +243,8 @@ original_logo_image = tk.PhotoImage(file=resource_path("information.png"))
 logo_image = original_logo_image.subsample(19, 19)  # Adjust the subsample parameters as needed
 
 # Create a button that will open a new tab when clicked
-button_new_tab = tk.Button(root, image=logo_image, command=open_new_tab, borderwidth=0)
-button_new_tab.grid(row=11, column=0, sticky='w', padx=10, pady=10)
+button_new_tab = tk.Button(frame, image=logo_image, command=open_new_tab, borderwidth=0)
+button_new_tab.grid(row=12, column=0, sticky='w', padx=10, pady=10)
 
 # Bind the Enter key to the calculate function
 root.bind('<Return>', lambda event=None: calculate())
