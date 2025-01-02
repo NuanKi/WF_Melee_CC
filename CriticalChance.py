@@ -204,7 +204,7 @@ check_vome_invocation = tk.BooleanVar()
 tk.Checkbutton(frame, text="Vome Invocation (+60%)", variable=check_vome_invocation).grid(row=4, column=2, columnspan=2, sticky='w', padx=20, pady=5)
 
 check_naramon_school = tk.BooleanVar()
-tk.Checkbutton(frame, text="Naramon School (+40%)", variable=check_naramon_school).grid(row=5, column=2, columnspan=2, sticky='w', padx=20, pady=5)
+tk.Checkbutton(frame, text="Madurai School (+40%)", variable=check_naramon_school).grid(row=5, column=2, columnspan=2, sticky='w', padx=20, pady=5)
 
 # Trace the checkboxes to call the calculate function when their state changes
 check_molt_augmented.trace_add('write', calculate)
